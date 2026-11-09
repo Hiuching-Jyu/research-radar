@@ -1,0 +1,59 @@
+name: Research Radar
+
+on:
+  schedule:
+    # Two pushes a day; papers, news and open-source projects go out together.
+    # Each push has 10 top picks + 20 more; items already pushed are never repeated.
+    # Cron is in UTC. Scheduled runs on GitHub often start several minutes late.
+    - cron: "30 0 * * *"
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Which part to run
+        type: choice
+        options: [all, papers, news]
+        default: all
+
+permissions:
+  contents: write   # commit data/sent.json
+  models: read      # only needed for GitHub Models
+
+concurrency:
+  group: research-radar
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run radar
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TOPICS_YAML: ${{ secrets.TOPICS_YAML }}
+          FEEDS_YAML: ${{ secrets.FEEDS_YAML }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          MODE: ${{ github.event.inputs.mode || 'all' }}
+        run: python -m radar.main --mode "$MODE"
+      - name: Commit sent.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/sent.json
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: update sent.json"
+          git pull --rebase
+          git push

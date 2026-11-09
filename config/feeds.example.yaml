@@ -1,0 +1,16 @@
+# Example. Copy to config/feeds.yaml and replace with your own feeds (feeds.yaml is not committed).
+# On GitHub Actions the same content is supplied through the FEEDS_YAML secret.
+# Avoid whole-site feeds of general news outlets: nearly everything is irrelevant and it burns LLM quota.
+
+media:
+  - name: Example Media
+    url: https://example.com/feed/
+
+company_blogs:
+  - name: Example Company Blog
+    url: https://example.com/blog/rss.xml
+
+# Tracked repos or folders: GitHub commits/releases feeds. Any update is pushed regardless of the threshold.
+tracked_repos:
+  - name: owner/repo releases
+    url: https://github.com/owner/repo/releases.atom

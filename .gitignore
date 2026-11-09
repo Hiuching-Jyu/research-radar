@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+.DS_Store
+
+# private config, never committed
+config/topics.yaml
+config/feeds.yaml
+config/tech_keywords_seed.txt
+docs/

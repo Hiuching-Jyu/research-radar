@@ -1,0 +1,53 @@
+# Example. Copy to config/topics.yaml and replace with your own topics (topics.yaml is not committed).
+# On GitHub Actions the same content is supplied through the TOPICS_YAML secret.
+
+# arXiv categories to search for papers
+arxiv_categories: [cond-mat.mtrl-sci, cs.LG]
+
+# Who the digest is for. Goes into the LLM prompt so it can judge what is useful to you.
+reader_profile: >
+  An engineer working on solid-state battery materials who wants to hear about new papers,
+  products, open-source tools and industry news in this field.
+
+# Optional extra scoring rules specific to your field
+scoring_notes: |
+  General "EV sales" or "clean energy" news with no battery technology content: cap at 5.
+
+# Language of the one-line summaries
+summary_language: English
+
+# Date shown in the message header is UTC plus this offset
+utc_offset_hours: 0
+
+# Optional: override display strings (see DEFAULT_LABELS in radar/telegram.py)
+# labels:
+#   paper: Papers
+#   news: Products & news
+#   repo: Open source
+#   more: More
+
+topics:
+  - id: solid_state_battery               # unique id
+    name: Solid-state batteries           # shown in the push (text before " (" if present)
+    description: >                        # used by the LLM to judge relevance: say what counts and what does not
+      Solid electrolyte materials, progress toward mass production of all-solid-state cells,
+      new cell products and test data. Vehicle sales and charging infrastructure do not count.
+    queries_en:                           # Google News (English edition) + Hacker News
+      - '"solid-state battery"'
+      - '"solid electrolyte" breakthrough'
+    queries_zh: []                        # Google News (Chinese edition), optional
+    arxiv_keywords:                       # arXiv; the first few are also used for GitHub search
+      - solid-state battery
+      - solid electrolyte
+
+  - id: battery_ml
+    name: ML for batteries
+    description: >
+      Machine learning for battery lifetime prediction, materials screening and battery
+      management: papers and open-source projects.
+    queries_en:
+      - '"battery" "machine learning" lifetime prediction'
+    queries_zh: []
+    arxiv_keywords:
+      - battery degradation prediction
+      - battery state of health

@@ -1,0 +1,53 @@
+# Global settings. Secrets never go here: use environment variables / GitHub Secrets.
+
+relevance_threshold: 7        # items scoring below this never appear in a push
+digest:
+  featured: 10                # top picks, each with a one-line summary
+  more: 20                    # listed after the top picks, title and link only
+notify_when_empty: false      # true: send a "nothing new today" message when there is nothing
+
+lookback_hours:
+  paper: 96                   # arXiv does not publish on weekends, so Monday brings 3-4 day old papers; sent.json stops repeats
+  news: 36
+  repo: 36
+
+dedup:
+  merge_similarity: 0.6       # looser threshold used after LLM filtering to merge same-event items
+  title_similarity: 0.8       # token overlap of normalized titles above which two items are the same
+  sent_retention_days: 30
+
+llm:
+  provider: anthropic         # anthropic | github_models | openai_compatible; override with LLM_PROVIDER
+  # the model name comes from the LLM_MODEL environment variable
+  batch_size: 20
+  concurrency: 4              # scoring requests in flight at once
+  effort: low                 # Anthropic output_config.effort; leave empty to omit
+  max_candidates: 400         # cap on items sent to the LLM per run
+
+arxiv:                        # categories live in the private topics.yaml (arxiv_categories)
+  max_per_topic: 100
+
+github_search:
+  max_per_query: 10
+  min_stars: 5
+  created_within_days: 7      # new repos need a few days to collect stars, so this window is longer
+  keywords_per_topic: 5       # how many of each topic's arxiv_keywords are searched
+
+hackernews:
+  lookback_hours: 168         # relevant HN posts are rare, so look back 7 days; sent.json stops repeats
+  min_points: 3
+
+http:
+  timeout: 20
+  user_agent: "research-radar/0.1 (personal feed reader)"
+  google_news_delay: 1.5      # seconds between Google News queries
+
+# Source authority: when several outlets cover one event, the one listed first wins
+source_priority:
+  - arxiv
+  - company_blogs
+  - tracked_repos
+  - github
+  - media
+  - hackernews
+  - google_news
