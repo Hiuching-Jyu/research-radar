@@ -5,8 +5,8 @@ on:
     # Two pushes a day; papers, news and open-source projects go out together.
     # Each push has 10 top picks + 20 more; items already pushed are never repeated.
     # Cron is in UTC. Scheduled runs on GitHub often start several minutes late.
-    - cron: "30 0 * * *"
-    - cron: "0 4 * * *"
+    - cron: "0 16 * * *"
+    - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
       mode:
