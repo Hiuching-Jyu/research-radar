@@ -104,6 +104,11 @@ def main(argv=None) -> int:
     scored = scorer.score(candidates) if scorer else []
     if candidates and not scored:
         log.error("every LLM batch failed; nothing pushed (check the API key, model name and network)")
+        if not args.dry_run:
+            try:  # tell the reader instead of going silent (e.g. the LLM account needs a top-up)
+                telegram.send([telegram.failure_message(scorer.provider, scorer.model, scorer.last_error)])
+            except Exception as e:
+                log.error("could not send the failure alert: %s", e)
         return 1
     threshold = s["relevance_threshold"]
     for i in scored:

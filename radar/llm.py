@@ -149,6 +149,7 @@ class Scorer:
         self.topic_ids = {t["id"] for t in cfg.topics}
         self._use_fallbacks = self.model.startswith(_FALLBACK_MODELS)
         self._client = None
+        self.last_error = ""   # most recent batch failure, used for the Telegram alert
         log.info("LLM: %s / %s", self.provider, self.model)
 
     @staticmethod
@@ -233,6 +234,7 @@ class Scorer:
                 self._score_batch(batch)
                 return [it for it in batch if it.relevance]
             except Exception as e:
+                self.last_error = str(e)
                 log.warning("LLM batch %d/%d attempt %d failed: %s", n, total, attempt, e)
         log.error("LLM batch %d/%d skipped (%d items left unscored, retried next run)", n, total, len(batch))
         return []

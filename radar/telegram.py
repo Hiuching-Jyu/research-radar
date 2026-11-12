@@ -75,6 +75,26 @@ def empty_message(cfg) -> str:
     return f"\U0001F6F0 {html.escape({**DEFAULT_LABELS, **cfg.labels}['empty'])}"
 
 
+# Substrings that mean the LLM account is out of money (checked case-insensitively).
+BILLING_HINTS = ("arrearage", "overdue", "insufficient", "balance", "billing", "payment",
+                 "quota", "credit", "http 402")
+
+
+def is_billing_error(error: str) -> bool:
+    low = error.lower()
+    return any(h in low for h in BILLING_HINTS)
+
+
+def failure_message(provider: str, model: str, error: str) -> str:
+    """Alert for a run where every LLM batch failed, so a dead radar never goes silent."""
+    e = html.escape
+    if is_billing_error(error):
+        head = "\u26A0\uFE0F <b>Research Radar 需要充值了</b>\n大模型账户欠费或额度用完，本次没有推送。充值后下一次运行会自动恢复。"
+    else:
+        head = "\u26A0\uFE0F <b>Research Radar 本次运行失败</b>\n大模型调用全部失败，本次没有推送。"
+    return f"{head}\n\n<i>{e(provider)} / {e(model)}</i>\n<code>{e(error[:300])}</code>"
+
+
 def send(messages: list[str]) -> None:
     token, chat_id = os.environ.get("TELEGRAM_BOT_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
     if not token or not chat_id:
